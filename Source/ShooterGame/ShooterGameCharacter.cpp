@@ -12,6 +12,8 @@
 #include "InputActionValue.h"
 #include "ShooterGame.h"
 
+
+
 AShooterGameCharacter::AShooterGameCharacter()
 {
 	// Set size for collision capsule
@@ -50,6 +52,21 @@ AShooterGameCharacter::AShooterGameCharacter()
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
+void AShooterGameCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);//隐藏角色骨骼中的weapon_r骨骼，这样我们就不会看到角色手里拿着枪了
+	Gun = GetWorld()->SpawnActor<AGun>(GunClass);//生成一个Gun的实例，并将其赋值给Gun变量 ps，Gun就是指向我们的枪的指针
+	if (Gun)
+	{
+		Gun->SetOwner(this);//设置枪的拥有者为当前角色。
+		Gun->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, TEXT("weapon_rSocket"));//将枪附加到角色的Mesh组件上的WeaponSocket插槽位置，这样枪就会跟随角色的动画和位置移动。
+		Gun->GunOwner = GetController();//设置枪的GunOwner变量为当前角色的Controller，这样枪就知道它是被哪个角色控制的了。
+	}
+
+}
+
 void AShooterGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Set up action bindings
@@ -65,6 +82,9 @@ void AShooterGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AShooterGameCharacter::Look);
+
+		//Shooting
+		EnhancedInputComponent->BindAction(ShootingAction, ETriggerEvent::Started, this, &AShooterGameCharacter::Shoot);
 	}
 	else
 	{
@@ -89,6 +109,8 @@ void AShooterGameCharacter::Look(const FInputActionValue& Value)
 	// route the input
 	DoLook(LookAxisVector.X, LookAxisVector.Y);
 }
+
+
 
 void AShooterGameCharacter::DoMove(float Right, float Forward)
 {
@@ -130,4 +152,10 @@ void AShooterGameCharacter::DoJumpEnd()
 {
 	// signal the character to stop jumping
 	StopJumping();
+}
+
+void AShooterGameCharacter::Shoot()
+{
+	//UE_LOG(LogTemp, Display, TEXT("Shooting"));
+	Gun->PullTrigger();
 }
