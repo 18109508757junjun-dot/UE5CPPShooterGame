@@ -2,6 +2,7 @@
 
 
 #include "Gun.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AGun::AGun()
@@ -62,6 +63,11 @@ void AGun::PullTrigger()
 		{
 			//在命中时，如果ImpactParticlesSystem不为空，则在命中位置生成一个粒子系统，使用UNiagaraFunctionLibrary的SpawnSystemAtLocation函数，传入游戏世界、ImpactParticlesSystem、命中位置和命中位置的旋转作为参数
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactParticlesSystem, HitResult.ImpactPoint,HitResult.ImpactPoint.Rotation());
+			AActor* HitActor = HitResult.GetActor();
+			if (HitActor)
+			{
+				UGameplayStatics::ApplyDamage(HitActor, BulletDamage, GunOwner, this, UDamageType::StaticClass());//如果命中结果中有一个有效的Actor，则对该Actor应用伤害，使用UGameplayStatics的ApplyDamage函数，传入被击中的Actor、子弹伤害值、枪的拥有者、造成伤害的Actor（即枪）和一个可选的伤害类型类作为参数
+			}
 		}
 	}
 	

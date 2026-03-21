@@ -101,12 +101,25 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	void Shoot();
+	
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AGun> GunClass;
 
 	AGun* Gun;
 
+	UPROPERTY(EditAnywhere)
+	float MaxHealth = 100.0f;
+
+	float Health;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool IsAlive = true;
+
+	UFUNCTION()
+	void OnTakeDamage(AActor* DamagedActor,float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);//当角色受到伤害时调用的函数，参数包括受伤害的角色，伤害值、伤害类型、造成伤害的控制器和造成伤害的Actor。
+	
+	void Shoot();
+	
 };
 

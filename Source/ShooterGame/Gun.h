@@ -32,6 +32,7 @@ public:
 	USkeletalMeshComponent* GunMesh;
 
 	AController* GunOwner;//枪的拥有者，指向控制这个枪的角色的Controller
+	
 	UPROPERTY(EditAnywhere)
 	float MaxRange = 10000.0f;
 	
@@ -41,6 +42,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* ImpactParticlesSystem;
+
+	UPROPERTY(EditAnywhere)
+	float BulletDamage = 10.0f;
 
 	void PullTrigger();
 

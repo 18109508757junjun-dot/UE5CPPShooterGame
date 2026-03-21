@@ -56,6 +56,10 @@ void AShooterGameCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Health = MaxHealth;
+
+	OnTakeAnyDamage.AddDynamic(this, &AShooterGameCharacter::OnTakeDamage);//绑定一个事件，当角色受到任何伤害时，都会调用OnTakeDamage函数来处理伤害逻辑。
+
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);//隐藏角色骨骼中的weapon_r骨骼，这样我们就不会看到角色手里拿着枪了
 	Gun = GetWorld()->SpawnActor<AGun>(GunClass);//生成一个Gun的实例，并将其赋值给Gun变量 ps，Gun就是指向我们的枪的指针
 	if (Gun)
@@ -159,3 +163,23 @@ void AShooterGameCharacter::Shoot()
 	//UE_LOG(LogTemp, Display, TEXT("Shooting"));
 	Gun->PullTrigger();
 }
+
+void AShooterGameCharacter::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
+{
+	
+	if (IsAlive)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Damage taken: %f"), Damage);
+		Health -= Damage;
+		if (Health <= 0)
+		{
+			IsAlive = false;
+			Health = 0;
+			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			UE_LOG(LogTemp, Display, TEXT("Character died: %s"), *GetActorNameOrLabel());
+		}
+		
+	}
+}
+
+
