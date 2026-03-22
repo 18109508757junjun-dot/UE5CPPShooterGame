@@ -38,6 +38,7 @@ void AGun::Tick(float DeltaTime)
 void AGun::PullTrigger()
 {
 	MuzzleFlashParticles->Activate(true);//当玩家按下扳机时，激活枪口闪光粒子系统，使其显示
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ShootSound, GetActorLocation());//播放发射子弹的声音
 	//UE_LOG(LogTemp, Display, TEXT("bang!"));
 	if (GunOwner) 
 	{
@@ -63,6 +64,7 @@ void AGun::PullTrigger()
 		{
 			//在命中时，如果ImpactParticlesSystem不为空，则在命中位置生成一个粒子系统，使用UNiagaraFunctionLibrary的SpawnSystemAtLocation函数，传入游戏世界、ImpactParticlesSystem、命中位置和命中位置的旋转作为参数
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactParticlesSystem, HitResult.ImpactPoint,HitResult.ImpactPoint.Rotation());
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), ImpactSound, HitResult.ImpactPoint);//播放命中声音
 			AActor* HitActor = HitResult.GetActor();
 			if (HitActor)
 			{

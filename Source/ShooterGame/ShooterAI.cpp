@@ -3,16 +3,14 @@
 
 #include "ShooterAI.h"
 #include "Kismet/GameplayStatics.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 void AShooterAI::BeginPlay()
 {
 	Super::BeginPlay();
 
 	//PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
-	if (EnemyAIBehaviorTree)
-	{
-		RunBehaviorTree(EnemyAIBehaviorTree);
-	}
+	
 
 	
 }
@@ -41,6 +39,27 @@ void AShooterAI::Tick(float DeltaTime)
 	}
 	*/
 
+}
+//优化tips，将StartBehaviorTree放在gamemode里，避免每个AI都调用一次StartBehaviorTree，都去寻找玩家角色，降低性能开销。
+void AShooterAI::StartBehaviorTree(AShooterGameCharacter* Player)
+{
+	if (EnemyAIBehaviorTree)
+	{
+		AICharacter = Cast<AShooterGameCharacter>(GetPawn());//将AI控制的角色转换为AShooterGameCharacter类型，并赋值给AICharacter变量。
+		if (Player)
+		{
+			PlayerCharacter = Player;
+		}
+		RunBehaviorTree(EnemyAIBehaviorTree);
+
+		UBlackboardComponent* MyBlackboard = GetBlackboardComponent();
+		if (MyBlackboard && PlayerCharacter && AICharacter)
+		{
+			//MyBlackboard->SetValueAsVector("PlayerLocation", PlayerCharacter->GetActorLocation());//将玩家角色的位置存储在黑板组件中，键名为"PlayerLocation"，值为玩家角色的位置。
+			MyBlackboard->SetValueAsVector("AIStartLocation", AICharacter->GetActorLocation());
+		}
+		
+	}
 }
 
 

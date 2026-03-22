@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "ShooterGame.h"
+#include "ShooterGamePlayerController.h"
 
 
 
@@ -57,7 +58,7 @@ void AShooterGameCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	Health = MaxHealth;
-
+	UpdatHud();//防止血条一开始不是满的
 	OnTakeAnyDamage.AddDynamic(this, &AShooterGameCharacter::OnTakeDamage);//绑定一个事件，当角色受到任何伤害时，都会调用OnTakeDamage函数来处理伤害逻辑。
 
 	GetMesh()->HideBoneByName(TEXT("weapon_r"), EPhysBodyOp::PBO_None);//隐藏角色骨骼中的weapon_r骨骼，这样我们就不会看到角色手里拿着枪了
@@ -164,6 +165,22 @@ void AShooterGameCharacter::Shoot()
 	Gun->PullTrigger();
 }
 
+void AShooterGameCharacter::UpdatHud()
+{
+	AShooterGamePlayerController* PlayerController = Cast<AShooterGamePlayerController>(GetController());
+	if (PlayerController)
+	{
+		float NewPercent = Health / MaxHealth;
+		if (NewPercent < 0.0f)
+		{
+			NewPercent = 0.0f;
+		}
+
+		PlayerController->HudWidget->SetHealthBarPercent(NewPercent);
+	}
+
+}
+
 void AShooterGameCharacter::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	
@@ -171,13 +188,17 @@ void AShooterGameCharacter::OnTakeDamage(AActor* DamagedActor, float Damage, con
 	{
 		UE_LOG(LogTemp, Display, TEXT("Damage taken: %f"), Damage);
 		Health -= Damage;
+		UpdatHud();
 		if (Health <= 0)
 		{
 			IsAlive = false;
 			Health = 0;
 			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			UE_LOG(LogTemp, Display, TEXT("Character died: %s"), *GetActorNameOrLabel());
+			DetachFromControllerPendingDestroy();//死后脱离控制器
+			//UE_LOG(LogTemp, Display, TEXT("Character died: %s"), *GetActorNameOrLabel());
 		}
+
+		
 		
 	}
 }

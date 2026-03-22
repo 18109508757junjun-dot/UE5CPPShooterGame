@@ -121,5 +121,6 @@ public:
 	
 	void Shoot();
 	
+	void UpdatHud();
 };
 

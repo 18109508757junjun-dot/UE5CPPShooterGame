@@ -41,11 +41,7 @@ protected:
 	UPROPERTY(EditAnywhere, Config, Category = "Input|Touch Controls")
 	bool bForceTouchControls = false;
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UHudWidget> HudWidgetClass;
 
-	UPROPERTY(VisibleAnywhere)
-	UHudWidget* HudWidget;
 
 	/** Gameplay initialization */
 	virtual void BeginPlay() override;
@@ -55,5 +51,13 @@ protected:
 
 	/** Returns true if the player should use UMG touch controls */
 	bool ShouldUseTouchControls() const;
+
+public:
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UHudWidget> HudWidgetClass;
+
+	UPROPERTY(VisibleAnywhere)
+	UHudWidget* HudWidget;
 
 };

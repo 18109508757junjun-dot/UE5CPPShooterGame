@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "ShooterGameCharacter.h"
 #include "ShooterAI.generated.h"
 
 /**
@@ -25,5 +26,10 @@ public:
 	//APawn* PlayerPawn;
 	UPROPERTY(EditAnywhere)
 	UBehaviorTree* EnemyAIBehaviorTree;
+
+	AShooterGameCharacter* PlayerCharacter;
+	AShooterGameCharacter* AICharacter;
+
+	void StartBehaviorTree(AShooterGameCharacter* Player);
 
 };
