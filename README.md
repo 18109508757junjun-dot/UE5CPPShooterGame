@@ -49,9 +49,9 @@
 
 由于缺少资产，源码主要集中在 `Source/` 目录下。建议重点审阅以下核心路径：
 
-* **角色逻辑：** `Source/.../ShooterCharacter.cpp` 
+* **角色逻辑：** `Source/.../ShooterGameCharacter.cpp` 
     * *关键点：输入处理机制、组件初始化、生命周期管理。*
-* **AI 驱动：** `Source/.../ShooterAIController.cpp`
+* **AI 驱动：** `Source/.../ShooterAI.cpp`
     * *关键点：C++ 如何与黑板 (Blackboard) 进行数据交互，驱动 AI 决策。*
 * **武器逻辑：** `Source/.../Gun.cpp` 
     * *关键点：射线检测算法实现、特效挂载逻辑。*
