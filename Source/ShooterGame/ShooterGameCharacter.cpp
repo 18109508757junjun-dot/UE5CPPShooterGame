@@ -89,7 +89,7 @@ void AShooterGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AShooterGameCharacter::Look);
 
 		//Shooting
-		EnhancedInputComponent->BindAction(ShootingAction, ETriggerEvent::Started, this, &AShooterGameCharacter::Shoot);
+		EnhancedInputComponent->BindAction(ShootingAction, ETriggerEvent::Started, this, &AShooterGameCharacter::Shoot);//玩家执行设计动作，调用函数shoot
 	}
 	else
 	{
@@ -158,16 +158,16 @@ void AShooterGameCharacter::DoJumpEnd()
 	// signal the character to stop jumping
 	StopJumping();
 }
-
+//射击动作实现
 void AShooterGameCharacter::Shoot()
 {
 	//UE_LOG(LogTemp, Display, TEXT("Shooting"));
 	Gun->PullTrigger();
 }
-
+//更新血量
 void AShooterGameCharacter::UpdatHud()
 {
-	AShooterGamePlayerController* PlayerController = Cast<AShooterGamePlayerController>(GetController());
+	AShooterGamePlayerController* PlayerController = Cast<AShooterGamePlayerController>(GetController());//获取玩家控制器
 	if (PlayerController)
 	{
 		float NewPercent = Health / MaxHealth;
@@ -176,17 +176,17 @@ void AShooterGameCharacter::UpdatHud()
 			NewPercent = 0.0f;
 		}
 
-		PlayerController->HudWidget->SetHealthBarPercent(NewPercent);
+		PlayerController->HudWidget->SetHealthBarPercent(NewPercent);//通过SetHealthBarPercent控制血条更新
 	}
 
 }
-
+//角色受伤逻辑实现
 void AShooterGameCharacter::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
 	
 	if (IsAlive)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Damage taken: %f"), Damage);
+		//UE_LOG(LogTemp, Display, TEXT("Damage taken: %f"), Damage);
 		Health -= Damage;
 		UpdatHud();
 		if (Health <= 0)

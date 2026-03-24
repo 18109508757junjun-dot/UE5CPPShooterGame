@@ -21,7 +21,9 @@ void UBTService_PlayerLocation::TickNode(UBehaviorTreeComponent& OwnerComp, uint
 
 	if (OwnerController && Player && Blackboard)
 	{
-		Blackboard->SetValueAsVector(GetSelectedBlackboardKey(), Player->GetActorLocation());
+		Blackboard->SetValueAsVector(GetSelectedBlackboardKey(), Player->GetActorLocation());//GetSelectedBlackboardKey()为获取当前关键词
 	}
-	
+	GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
+	UPawnMovementComponent* MovementComponent = Player->GetMovementComponent();
+
 }

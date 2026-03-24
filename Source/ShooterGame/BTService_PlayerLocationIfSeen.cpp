@@ -29,8 +29,8 @@ void UBTService_PlayerLocationIfSeen::TickNode(UBehaviorTreeComponent& OwnerComp
 		}
 		else
 		{
-			Blackboard->ClearValue(GetSelectedBlackboardKey());
-			OwnerController->ClearFocus(EAIFocusPriority::Gameplay);
+			Blackboard->ClearValue(GetSelectedBlackboardKey());//消除关键值playerlocation，当ai失去该值时，便会进入下一个调查阶段
+			OwnerController->ClearFocus(EAIFocusPriority::Gameplay);//消除ai视线追踪
 		}
 	}
 }

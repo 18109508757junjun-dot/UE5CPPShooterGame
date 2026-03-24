@@ -1,67 +1,31 @@
-# 忽略常见的操作系统/编辑器文件
-.DS_Store
-Thumbs.db
-*.log
-*.tmp
-*.user
-*.suo
-*.pidb
-*.booproj
-*.tlog
-.vscode/
-.idea/
-.vs/
+# Default: ignore everything
+*
 
-# Visual Studio / Xcode build & generated
-*.sln
-*.suo
-*.VC.db
-*.VC.opendb
-*.vcxproj.user
-*.xcodeproj/
-*.xcworkspace/
-*.xcuserdata/
-
-# Unreal Engine generated folders
-Binaries/
-Build/
-DerivedDataCache/
-Intermediate/
-Saved/
-
-# 忽略整个 Content 目录下的所有素材，下面使用否定规则放行 Blueprints 文件夹
-Content/**
-
-# 允许 Content 目录结构中名为 Blueprints 的文件夹及其所有内容（保留蓝图）
-!Content/**/Blueprints/
-!Content/**/Blueprints/**
-
-# 保留 C++ 源代码目录
-!Source/
-!Source/**
-
-# 保留项目文件（可选，通常需要提交 .uproject）
+# Keep this file and repo metadata essentials
+!.gitignore
+!.gitattributes
 !*.uproject
 
-# 其他大文件或缓存
-*.uasset
-*.umap
-# 上面的通配会被前面的否定规则覆盖，从而只保留 Blueprints 文件夹中的 .uasset
+# Keep C++ source headers/implementation under Source
+!Source/
+!Source/**/
+!Source/**/*.h
+!Source/**/*.hpp
+!Source/**/*.inl
+!Source/**/*.cpp
+!Source/**/*.c
 
-# 可选：如果需要保留 Plugins 的 C++ 源也放行
-!Plugins/
+# Keep Unreal build scripts under Source
+!Source/**/*.Build.cs
+!Source/**/*.Target.cs
+
+# Optional: keep plugin C++ source too
 !Plugins/**/Source/
-!Plugins/**/Source/**
-
-# 忽略构建输出和临时文件
-*.exe
-*.dll
-*.lib
-*.app
-
-# 文本编辑器临时文件
-*~
-*.swp
-
-# 保持空目录的占位文件（如需使用，请在对应目录放置 .gitkeep）
-# End of .gitignore
+!Plugins/**/Source/**/
+!Plugins/**/Source/**/*.h
+!Plugins/**/Source/**/*.hpp
+!Plugins/**/Source/**/*.inl
+!Plugins/**/Source/**/*.cpp
+!Plugins/**/Source/**/*.c
+!Plugins/**/Source/**/*.Build.cs
+!Plugins/**/Source/**/*.Target.cs
