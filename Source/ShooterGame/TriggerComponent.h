@@ -24,30 +24,32 @@ protected:
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	// 可选：同一个触发器控制多个可移动对象（例如双开门的两个门扇）
 	UPROPERTY(EditAnywhere)
-AActor* MoverActor;
+	TArray<AActor*> MoverActors;
 
-UPROPERTY(VisibleAnywhere)
-bool IsTriggered = false;
+	UPROPERTY(VisibleAnywhere)
+	bool IsTriggered = false;
 
-UPROPERTY(EditAnywhere)
-bool IsPressurePlate = false;//是否是压力板.
+	UPROPERTY(EditAnywhere)
+	bool IsPressurePlate = false;//是否是压力板.
 
-UPROPERTY(VisibleAnywhere)
-int32 OverlappingActorsNum = 0;//记录当前与触发器重叠的actor数量
+	UPROPERTY(VisibleAnywhere)
+	int32 OverlappingActorsNum = 0;//记录当前与触发器重叠的actor数量
+
+	// 当使用 MoverActors 时，这里会缓存所有找到的 MoveComponent
+	UPROPERTY(Transient)
+	TArray<UMoveComponent*> Movers;
 
 
-UMoveComponent* Mover;
+	void Trigger(bool NewTriggerValue);
 
-
-void Trigger(bool NewTriggerValue);
-
-/** 当某对象进入球体组件时调用 */
-UFUNCTION()
-void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-//OverlappedComp 第一个指针指向与我们重叠的组件 OtherActor第二个指向拥有该组件的actor
-/** 当某对象离开球体组件时调用 */
-UFUNCTION()
-void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	/** 当某对象进入球体组件时调用 */
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	//OverlappedComp 第一个指针指向与我们重叠的组件 OtherActor第二个指向拥有该组件的actor
+	/** 当某对象离开球体组件时调用 */
+	UFUNCTION()
+	void OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 };
