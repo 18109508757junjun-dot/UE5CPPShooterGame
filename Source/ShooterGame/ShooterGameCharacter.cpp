@@ -12,6 +12,8 @@
 #include "InputActionValue.h"
 #include "ShooterGame.h"
 #include "ShooterGamePlayerController.h"
+#include "CollectableItem.h"
+#include "Lock.h"
 
 
 
@@ -19,7 +21,7 @@ AShooterGameCharacter::AShooterGameCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -49,7 +51,7 @@ AShooterGameCharacter::AShooterGameCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
+	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character)
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
 
@@ -76,7 +78,7 @@ void AShooterGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -90,6 +92,8 @@ void AShooterGameCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 		//Shooting
 		EnhancedInputComponent->BindAction(ShootingAction, ETriggerEvent::Started, this, &AShooterGameCharacter::Shoot);//玩家执行设计动作，调用函数shoot
+
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AShooterGameCharacter::Interact);
 	}
 	else
 	{
@@ -128,10 +132,10 @@ void AShooterGameCharacter::DoMove(float Right, float Forward)
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 
-		// get right vector 
+		// get right vector
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-		// add movement 
+		// add movement
 		AddMovementInput(ForwardDirection, Forward);
 		AddMovementInput(RightDirection, Right);
 	}
@@ -164,6 +168,80 @@ void AShooterGameCharacter::Shoot()
 	//UE_LOG(LogTemp, Display, TEXT("Shooting"));
 	Gun->PullTrigger();
 }
+//机关交互
+void AShooterGameCharacter::Interact()
+{
+	//UE_LOG(LogTemp,Display,TEXT("Interact"));
+	FVector Start = FollowCamera->GetComponentLocation();//获取摄像机位置作为起始点
+	FVector End = Start + (FollowCamera->GetForwardVector() * MaxInteractDistance);//终点位置=起始点+（摄像机前向量*最大交互距离）
+
+
+
+	FCollisionShape InteractSphere = FCollisionShape::MakeSphere(InteractSphereRadius);//创建一个球形碰撞体，参数是半径
+
+
+	FHitResult HitResult;//创建一个碰撞结果结构体，用于存储碰撞检测的结果
+	//这个函数是进行碰撞检测的函数，使用球形碰撞体从起始点到终点进行检测，检测碰撞通道为ECC_GameTraceChannel2（自定义通道），将结果存储在HitResult中
+	bool HasHit = GetWorld()->SweepSingleByChannel(
+		HitResult,
+		Start, End,
+		FQuat::Identity,
+		ECC_GameTraceChannel2,
+		InteractSphere);//该函数参数从左到右依次是碰撞结果，开始位置，结束位置，旋转（这里使用默认值），碰撞通道(自定义通道)，碰撞形状
+
+	if (HasHit)
+	{
+		AActor* HitActor = HitResult.GetActor();//获取被碰撞到的Actor
+		//UE_LOG(LogTemp, Display, TEXT("Hit Actor: %s"), *HitActor->GetActorNameOrLabel());//输出被碰撞到的Actor的名字
+
+		if (HitActor->ActorHasTag("CollectableItem"))
+		{
+			//碰撞的actor是CollectableItem标签
+
+			ACollectableItem* CollectableItem = Cast<ACollectableItem>(HitActor);//将被碰撞到的Actor转换为ACollectableItem类型,这样就可以访问ACollectableItem类中的属性和方法了
+			if (CollectableItem)
+			{
+				//UE_LOG(LogTemp, Display, TEXT("Hit a Collectable Item with name %s!"),*CollectableItem->ItemName);
+				ItemList.Add(CollectableItem->ItemName);//将被碰撞到的物品的名字添加到角色的物品列表中
+				CollectableItem->Destroy();//销毁被碰撞到的物品
+			}
+		}
+
+		else if (HitActor->ActorHasTag("Lock"))
+		{
+			//碰撞的actor是Lock标签
+
+			ALock* LockActor = Cast<ALock>(HitActor);
+			if (LockActor)
+			{
+				//UE_LOG(LogTemp, Display, TEXT("Hit a Lock with name %s!"),*LockActor->KeyItemName);
+                if (!LockActor->GetIsKeyPlaced()) //检查机关上是否放置钥匙，改为使用LockActor的GetIsKeyPlaced()
+				{
+					int32 ItemsRemoved = ItemList.RemoveSingle(LockActor->KeyItemName);//从物品列表中移除一个与锁的钥匙名字相同的物品
+					if (ItemsRemoved)
+					{
+						LockActor->SetIsKeyPlaced(true);
+					}
+					else
+					{
+						UE_LOG(LogTemp, Display, TEXT("The lock is not in inventory!"));
+					}
+				}
+				else//机关上有钥匙
+				{
+					ItemList.Add(LockActor->KeyItemName);
+					LockActor->SetIsKeyPlaced(false);
+				}
+
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("No Actor Hit"));//如果没有碰撞到任何Actor，输出没有碰撞到Actor
+	}
+}
+
 //更新血量
 void AShooterGameCharacter::UpdatHud()
 {
@@ -183,7 +261,7 @@ void AShooterGameCharacter::UpdatHud()
 //角色受伤逻辑实现
 void AShooterGameCharacter::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	
+
 	if (IsAlive)
 	{
 		//UE_LOG(LogTemp, Display, TEXT("Damage taken: %f"), Damage);
@@ -198,9 +276,7 @@ void AShooterGameCharacter::OnTakeDamage(AActor* DamagedActor, float Damage, con
 			//UE_LOG(LogTemp, Display, TEXT("Character died: %s"), *GetActorNameOrLabel());
 		}
 
-		
-		
+
+
 	}
 }
-
-

@@ -31,7 +31,7 @@ class AShooterGameCharacter : public ACharacter
 	/** Follow camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Components", meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FollowCamera;
-	
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -51,14 +51,17 @@ protected:
 	/** Mouse Look Input Action */
 	UPROPERTY(EditAnywhere, Category="Input")
 	UInputAction* MouseLookAction;
-	
+
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* ShootingAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* InteractAction;
 
 public:
 
 	/** Constructor */
-	AShooterGameCharacter();	
+	AShooterGameCharacter();
 
 protected:
 
@@ -73,7 +76,7 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	
+
 
 public:
 
@@ -93,6 +96,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Input")
 	virtual void DoJumpEnd();
 
+
+
 public:
 
 	/** Returns CameraBoom subobject **/
@@ -101,7 +106,7 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	
+
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AGun> GunClass;
@@ -113,14 +118,28 @@ public:
 
 	float Health;
 
+	// --- Interact settings (used by Interact()) ---
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Interact")
+	float MaxInteractDistance = 300.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Interact")
+	float InteractSphereRadius = 80.0f;
+
+
 	UPROPERTY(BlueprintReadOnly)
 	bool IsAlive = true;
 
 	UFUNCTION()
 	void OnTakeDamage(AActor* DamagedActor,float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);//当角色受到伤害时调用的函数，参数包括受伤害的角色，伤害值、伤害类型、造成伤害的控制器和造成伤害的Actor。
-	
-	void Shoot();
-	
-	void UpdatHud();
-};
 
+	void Shoot();
+
+	void UpdatHud();
+
+	void Interact();
+private:
+	// Inventory of collected key/item names used by Lock interactions.
+	UPROPERTY(VisibleAnywhere, Category="Interact")
+	TArray<FString> ItemList;
+
+};
