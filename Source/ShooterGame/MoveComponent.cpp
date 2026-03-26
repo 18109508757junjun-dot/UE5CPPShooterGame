@@ -38,12 +38,23 @@ void UMoveComponent::BeginPlay()
 void UMoveComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	if (!IsValid(GetOwner()))
+	{
+		return;
+	}
 	// 获取当前 Actor 的位置
 	FVector CurrentLocation = GetOwner()->GetActorLocation();
 
 	// 如果未到达目标位置，则按指定速度插值移动
 	if (!CurrentLocation.Equals(TargetLocation))
 	{
+		if (MoveTime <= KINDA_SMALL_NUMBER)
+		{
+			// Avoid divide-by-zero / INF speed; snap to target.
+			GetOwner()->SetActorLocation(TargetLocation);
+			return;
+		}
+
 		// 计算插值速度，移动速率 = 位移长度 / 总用时
 		float Speed = MoveOffset.Length() / MoveTime;
 

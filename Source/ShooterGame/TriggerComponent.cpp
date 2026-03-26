@@ -54,7 +54,7 @@ void UTriggerComponent::Trigger(bool NewTriggerValue)
 	{
 		for (UMoveComponent* EachMover : Movers)//遍历Movers数组中的每个MoveComponent组件
 		{
-			if (EachMover)//如果MoveComponent组件不为空，则设置移动状态
+			if (IsValid(EachMover))//如果MoveComponent组件不为空，则设置移动状态
 			{
 				EachMover->SetMove(NewTriggerValue);//设置移动状态
 			}

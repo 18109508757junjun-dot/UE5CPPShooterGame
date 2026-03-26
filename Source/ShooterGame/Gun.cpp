@@ -40,7 +40,7 @@ void AGun::PullTrigger()
 	MuzzleFlashParticles->Activate(true);//当玩家按下扳机时，激活枪口闪光粒子系统，使其显示
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), ShootSound, GetActorLocation());//播放发射子弹的声音
 	//UE_LOG(LogTemp, Display, TEXT("bang!"));
-	if (GunOwner) 
+	if (IsValid(GunOwner))
 	{
 		FVector ViewPointLocation;
 		FRotator ViewPointRotation;

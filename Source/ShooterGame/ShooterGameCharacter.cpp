@@ -165,6 +165,10 @@ void AShooterGameCharacter::DoJumpEnd()
 void AShooterGameCharacter::Shoot()
 {
 	//UE_LOG(LogTemp, Display, TEXT("Shooting"));
+	if (!IsAlive || !Gun)
+	{
+		return;
+	}
 	Gun->PullTrigger();
 }
 //机关交互
@@ -245,7 +249,7 @@ void AShooterGameCharacter::Interact()
 void AShooterGameCharacter::UpdatHud()
 {
 	AShooterGamePlayerController* PlayerController = Cast<AShooterGamePlayerController>(GetController());//获取玩家控制器
-	if (PlayerController)
+	if (PlayerController && PlayerController->HudWidget)
 	{
 		float NewPercent = Health / MaxHealth;
 		if (NewPercent < 0.0f)
@@ -271,7 +275,20 @@ void AShooterGameCharacter::OnTakeDamage(AActor* DamagedActor, float Damage, con
 			IsAlive = false;
 			Health = 0;
 			GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			DetachFromControllerPendingDestroy();//死后脱离控制器
+
+			// 防止死亡瞬间仍触发射击/使用失效 Controller
+			if (Gun)
+			{
+				Gun->GunOwner = nullptr;
+			}
+
+			// 不要在这里立即 Detach Controller：输入/武器/HUD 可能仍在同一帧访问 Controller。
+			// 练习项目里先禁用输入和移动，避免死亡后继续触发行为。
+			if (AController* CurrentController = GetController())
+			{
+				DisableInput(Cast<APlayerController>(CurrentController));
+			}
+			GetCharacterMovement()->DisableMovement();
 			//UE_LOG(LogTemp, Display, TEXT("Character died: %s"), *GetActorNameOrLabel());
 		}
 
