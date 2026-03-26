@@ -43,6 +43,14 @@
 ### 5. UI 交互层 (UI Framework)
 * **实现方案：** 通过 **Widget Blueprint** 搭建 HUD 与菜单界面，采用 C++ 定义底层数据接口，蓝图负责视觉表现，遵循典型的 **MVC 设计模式**。
 
+### 6. 场景级交互与解谜系统 (World Interaction & Puzzle Mechanics) 
+* **核心代码：** Lock.cpp, MovementComponent.cpp, CollectalbeItem.cpp
+
+* **架构设计：** 引入了触发器和移动组件，通过Lock与CollectableItem结合Trace Channel实现了机关的交互逻辑。
+
+* **联动逻辑 (钥匙与锁)：** 基于 多播委托 (Multicast Delegates) 构建了事件驱动模型。当玩家拾取特定 Tag 的钥匙时，通过事件分发器实时唤醒场景中相关联的自动门与锁扣，完成状态流转。
+
+
 ---
 
 ## 📂 如何阅读本项目 (How to Navigate)
